@@ -25,7 +25,8 @@ from planner_agent import run_planner
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REQUIREMENTS_PATH = os.path.join(HERE, "requirements.json")
-OUT_PATH = os.path.join(HERE, "plan.json")
+ARTIFACTS_DIR = os.path.join(HERE, "artifacts")
+OUT_PATH = os.path.join(ARTIFACTS_DIR, "plan.json")
 
 
 def main():
@@ -42,6 +43,7 @@ def main():
     plan_artifact = dict(requirements)
     plan_artifact.update(plan)
 
+    os.makedirs(ARTIFACTS_DIR, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(plan_artifact, f, indent=2, ensure_ascii=False)
 

@@ -36,12 +36,22 @@ SYSTEM_PROMPT = """You are a senior robot software engineer. You receive a
 validated navigation plan (a JSON object) and you write the actual Python code
 that makes the robot navigate according to that plan.
 
+The robot's sensor input "state" is a dictionary with EXACTLY these six
+boolean keys:
+    goal_ahead, goal_on_left, goal_on_right,
+    front_blocked, left_blocked, right_blocked
+
 Requirements for the code you produce:
 1. It must be plain, valid Python 3 code that can be executed as-is.
-2. It MUST define and fully implement the navigation decision function below.
-   You may rename the function, add helper functions and docstrings, but the
-   core if/elif/else logic MUST be kept exactly as shown (matching the plan's
-   "decisions" rules):
+2. It MUST define the main entry function decide_next_move(state) that takes
+   the sensor state dictionary and returns one of the allowed actions. Other
+   programs will call ONLY decide_next_move(state) - they will not call any
+   helper function inside it.
+3. It MUST also retain the original navigation logic: keep the original
+   decision function (decide_next_action) AND add the decide_next_move(state)
+   wrapper. Use the reference implementation below - you may rename/extend
+   helper functions and add docstrings, but the core if/elif logic MUST be
+   kept:
 
    def decide_next_action(blocked_ahead, blocked_left, blocked_right,
                           goal_reached):
@@ -55,10 +65,30 @@ Requirements for the code you produce:
            return "RIGHT"
        return "STOP"
 
-3. You MAY add small helper functions (e.g. a navigate() loop that calls
-   decide_next_action), but EVERY function must contain real working logic.
-   NEVER use "pass" and NEVER write placeholder comments like
-   "Replace with actual logic".
+   def decide_next_move(state):
+       goal_ahead = state["goal_ahead"]
+       goal_on_left = state["goal_on_left"]
+       goal_on_right = state["goal_on_right"]
+       front_blocked = state["front_blocked"]
+       left_blocked = state["left_blocked"]
+       right_blocked = state["right_blocked"]
+       # Prefer moving toward the goal whenever it is safe.
+       if goal_ahead and not front_blocked:
+           return "FORWARD"
+       if goal_on_left and not left_blocked:
+           return "LEFT"
+       if goal_on_right and not right_blocked:
+           return "RIGHT"
+       # Otherwise avoid obstacles and keep moving (original logic).
+       if not front_blocked:
+           return "FORWARD"
+       if not left_blocked:
+           return "LEFT"
+       if not right_blocked:
+           return "RIGHT"
+       # No safe direction: stop.
+       return "STOP"
+
 4. The code may ONLY use the actions listed in the plan's "allowed_actions"
    (FORWARD, LEFT, RIGHT, STOP) - nothing else.
 5. Use only the Python standard library. Do not import any external library.
@@ -119,7 +149,8 @@ def validate_code(code):
     Checks that:
     - the code is a string,
     - it compiles as valid Python 3 (compile with mode='exec'),
-    - it defines at least one function (contains a top-level "def"),
+    - it defines the mandatory decide_next_move(state) entry function,
+    - it defines at least one function,
     - it does not contain obviously dangerous constructs.
 
     Returns the validated (cleaned) code string on success, otherwise raises
@@ -133,8 +164,6 @@ def validate_code(code):
     if not code.strip():
         raise ValueError("Generated code is empty.")
 
-    # The plan's actions must be the only ones the code may use.  Any string
-    # literal that looks like an action must be one of the allowed actions.
     # (Simple sanity check: no obviously forbidden constructs.)
     forbidden = ["eval(", "exec(", "__import__", "subprocess", "socket", "open("]
     lowered = code.lower()
@@ -155,11 +184,17 @@ def validate_code(code):
             )
         ) from exc
 
+    # Must define the mandatory decide_next_move(state) entry function.
+    if "def decide_next_move" not in code:
+        raise ValueError(
+            "Generated code must define the entry function decide_next_move(state)."
+        )
+
     # Must define at least one function meaningful for navigation.
     if "def " not in code:
         raise ValueError(
             "Generated code must define at least one function (e.g. "
-            "decide_next_action)."
+            "decide_next_move)."
         )
 
     return code
