@@ -1,0 +1,11 @@
+{
+  "goal": "Navigate the robot toward its goal while avoiding blocked paths.",
+  "allowed_actions": [
+    "FORWARD",
+    "LEFT",
+    "RIGHT",
+    "STOP"
+  ],
+  "safe_stop": true,
+  "avoid.obstacles": true
+}
