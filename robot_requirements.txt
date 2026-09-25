@@ -1,0 +1,15 @@
+Qwen output for brief.txt
+============================================================
+
+--- Run 1 ---
+1. The robot must navigate toward its goal.
+2. ...
+
+--- Run 2 ---
+1. The robot must navigate toward its goal.
+2. ...
+
+--- Run 3 ---
+1. The robot must navigate toward its goal.
+2. ...
+
