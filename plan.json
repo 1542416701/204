@@ -1,0 +1,18 @@
+{
+  "goal": "Navigate the robot toward its goal while avoiding blocked paths.",
+  "allowed_actions": [
+    "FORWARD",
+    "LEFT",
+    "RIGHT",
+    "STOP"
+  ],
+  "safe_stop": true,
+  "avoid.obstacles": true,
+  "strategy": "The robot will navigate towards its goal by moving forward and turning as necessary to avoid obstacles. It will stop when it reaches the goal or when it cannot proceed safely.",
+  "decisions": [
+    "If an obstacle is detected in front of the robot, it will turn LEFT.",
+    "If an obstacle is detected to the left of the robot, it will turn RIGHT.",
+    "If the robot cannot proceed in any direction, it will stop and wait for further instructions."
+  ],
+  "stop_condition": "reaching the goal or when no direction is safe to move into"
+}

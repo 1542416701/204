@@ -1,1 +1,47 @@
-## the logic is similar to the run_planner and run_analyst files
+"""
+run_developer.py
+
+Runner for the Developer Agent.  Its responsibilities:
+    1. read the validated navigation plan from plan.json (the artifact
+       produced by the Planner Agent),
+    2. call run_developer(plan),
+    3. receive the validated Python code,
+    4. store the generated code in a file called navigation_logic.py.
+
+Usage:
+    python run_developer.py
+"""
+
+import json
+import os
+
+from developer_agent import run_developer
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+PLAN_PATH = os.path.join(HERE, "plan.json")
+OUT_PATH = os.path.join(HERE, "navigation_logic.py")
+
+
+def main():
+    with open(PLAN_PATH, "r", encoding="utf-8") as f:
+        plan = json.load(f)
+
+    print("Validated plan (input to the Developer Agent):")
+    print(json.dumps(plan, indent=2, ensure_ascii=False))
+    print()
+
+    code = run_developer(plan)
+
+    with open(OUT_PATH, "w", encoding="utf-8") as f:
+        f.write(code)
+        if not code.endswith("\n"):
+            f.write("\n")
+
+    print("Validated navigation code:")
+    print(code)
+    print()
+    print("Saved to: {}".format(OUT_PATH))
+
+
+if __name__ == "__main__":
+    main()

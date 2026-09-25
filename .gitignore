@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Temporary run/debug output
+_run*.txt
+_debug*.py
